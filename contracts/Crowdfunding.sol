@@ -30,3 +30,28 @@ contract Crowdfunding {
         require(raised >= goal, "Goal not reached");
         payable(owner).transfer(address(this).balance);
     }
+
+    // Refund if goal not met
+    function refund() external {
+        require(block.timestamp >= deadline, "Campaign not ended");
+        require(raised < goal, "Goal was met");
+        uint amount = contributions[msg.sender];
+        require(amount > 0, "Nothing to refund");
+        contributions[msg.sender] = 0;
+        payable(msg.sender).transfer(amount);
+    }
+
+    // Get time remaining (in seconds) until the deadline
+    function getTimeRemaining() external view returns (uint) {
+        if (block.timestamp >= deadline) {
+            return 0;
+        } else {
+            return deadline - block.timestamp;
+        }
+    }
+
+    // Check if the funding goal has been reached
+    function isGoalReached() external view returns (bool) {
+        return raised >= goal;
+    }
+}
